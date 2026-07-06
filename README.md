@@ -48,9 +48,9 @@ No information is transmitted over the Internet.
 
 Daryoosh Borzuei
 
-Google Scholar
+Google Scholar: https://scholar.google.com/citations?user=kKVpJGcAAAAJ&hl=fa
 
-ResearchGate
+ResearchGate: https://www.researchgate.net/profile/Daryoosh-Borzuei-2
 
 ##License
 
