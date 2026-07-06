@@ -1,6 +1,6 @@
-##Hesabdar
+# Hesabdar
 
-##Persian Offline Personal Accounting
+## Persian Offline Personal Accounting
 
 Hesabdar is a completely offline personal accounting application written as a single HTML file.
 
@@ -14,20 +14,21 @@ Database
 
 All financial data remains on the user's device.
 
-##Features
-Personal finance dashboard
-Income, expense and payment tracking
-Persian (Jalali) calendar
-Monthly financial reports
-Category analysis
-Interactive charts
-CSV export for Excel
-JSON backup and restore
-Smart backup merging
-Multiple accounts
-Custom categories
-Fully offline
-Responsive interface
+## Features
+
+- Personal finance dashboard
+- Income, expense and payment tracking
+- Persian (Jalali) calendar
+- Monthly financial reports
+- Category analysis
+- Interactive charts
+- CSV export for Excel
+- JSON backup and restore
+- Smart backup merging
+- Multiple accounts
+- Custom categories
+- Fully offline
+- Responsive interface
 
 
 ##Technology
