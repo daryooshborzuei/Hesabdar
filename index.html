@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دفتر حساب — حسابداری شخصی</title>
+<style>
+:root{
+  --bg:#F5F3ED;
+  --surface:#FFFFFF;
+  --ink:#22303A;
+  --muted:#71808C;
+  --line:#E4E0D5;
+  --primary:#0E5F52;
+  --primary-soft:#E3EFEC;
+  --income:#178A50;
+  --income-soft:#E6F4EC;
+  --expense:#C94747;
+  --expense-soft:#FBEAEA;
+  --payment:#C07E0A;
+  --payment-soft:#FBF1DE;
+  --gold:#B99339;
+  --radius:12px;
+  --shadow:0 1px 3px rgba(34,48,58,.08),0 4px 14px rgba(34,48,58,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Vazirmatn","Vazir","IRANSans","Segoe UI",Tahoma,Arial,sans-serif;
+  background:var(--bg);color:var(--ink);font-size:15px;line-height:1.9;
+  -webkit-font-smoothing:antialiased;
+}
+.hidden{display:none!important}
+
+/* ---------- header ---------- */
+.app-header{
+  background:linear-gradient(135deg,#0B4A40 0%,#0E5F52 60%,#12705F 100%);
+  color:#fff;padding:18px 20px 16px;
+  border-bottom:3px solid var(--gold);
+}
+.header-inner{max-width:1080px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:1.45rem;font-weight:800;letter-spacing:-.3px}
+.brand .tagline{font-size:.8rem;opacity:.85}
+.today-box{text-align:left;font-size:.85rem;opacity:.95;line-height:1.6}
+.today-box b{font-size:1.02rem}
+
+/* ---------- backup banner ---------- */
+.banner{
+  max-width:1080px;margin:12px auto 0;padding:10px 16px;border-radius:var(--radius);
+  background:#FFF7E0;border:1px solid #E8D48A;color:#6B5410;font-size:.87rem;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+.banner button{background:var(--gold);color:#fff;border:none;border-radius:8px;padding:6px 14px;cursor:pointer;font-family:inherit;font-size:.85rem}
+
+/* ---------- tabs ---------- */
+.tabs{
+  max-width:1080px;margin:14px auto 0;padding:0 12px;display:flex;gap:6px;
+  overflow-x:auto;scrollbar-width:thin;-webkit-overflow-scrolling:touch;
+}
+.tabs button{
+  flex:0 0 auto;background:var(--surface);border:1px solid var(--line);color:var(--muted);
+  padding:8px 16px;border-radius:999px;cursor:pointer;font-family:inherit;font-size:.88rem;
+  white-space:nowrap;transition:all .15s;
+}
+.tabs button:hover{border-color:var(--primary);color:var(--primary)}
+.tabs button.active{background:var(--primary);border-color:var(--primary);color:#fff;font-weight:700}
+
+/* ---------- layout ---------- */
+main{max-width:1080px;margin:16px auto 40px;padding:0 12px}
+section.tab-panel{display:none}
+section.tab-panel.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){section.tab-panel.active{animation:none}}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.card h2{font-size:1.05rem;font-weight:800;margin-bottom:12px;color:var(--primary);display:flex;align-items:center;gap:8px}
+.card h3{font-size:.95rem;font-weight:700;margin:14px 0 8px}
+.grid{display:grid;gap:12px}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:820px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+
+/* ---------- stat cards ---------- */
+.stat{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px 16px;border-inline-start:5px solid var(--muted);box-shadow:var(--shadow);
+}
+.stat .label{font-size:.8rem;color:var(--muted)}
+.stat .value{font-size:1.25rem;font-weight:800;margin-top:2px;direction:rtl}
+.stat .sub{font-size:.75rem;color:var(--muted);margin-top:2px}
+.stat.income{border-inline-start-color:var(--income)}
+.stat.income .value{color:var(--income)}
+.stat.expense{border-inline-start-color:var(--expense)}
+.stat.expense .value{color:var(--expense)}
+.stat.payment{border-inline-start-color:var(--payment)}
+.stat.payment .value{color:var(--payment)}
+.stat.saving{border-inline-start-color:var(--primary)}
+.stat.saving .value{color:var(--primary)}
+.stat.saving.negative{border-inline-start-color:var(--expense)}
+.stat.saving.negative .value{color:var(--expense)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--primary-soft);color:var(--primary);border-radius:999px;padding:5px 14px;font-size:.85rem;font-weight:700}
+.chip small{font-weight:400;color:var(--muted);margin-inline-start:4px}
+
+/* ---------- forms ---------- */
+label.f-label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:4px}
+input[type=text],select,textarea{
+  width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 12px;
+  font-family:inherit;font-size:.95rem;background:#FBFAF7;color:var(--ink);
+}
+input[type=text]:focus,select:focus,textarea:focus{outline:2px solid var(--primary);outline-offset:0;border-color:var(--primary)}
+.form-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px}
+@media(max-width:680px){.form-row{grid-template-columns:1fr}}
+.date-triplet{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:6px}
+
+.type-pills{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.type-pills label{
+  flex:1;min-width:110px;text-align:center;border:1.5px solid var(--line);border-radius:10px;
+  padding:9px 6px;cursor:pointer;font-weight:700;font-size:.9rem;color:var(--muted);background:#FBFAF7;
+  transition:all .12s;
+}
+.type-pills input{display:none}
+.type-pills label.p-income.checked{background:var(--income-soft);border-color:var(--income);color:var(--income)}
+.type-pills label.p-expense.checked{background:var(--expense-soft);border-color:var(--expense);color:var(--expense)}
+.type-pills label.p-payment.checked{background:var(--payment-soft);border-color:var(--payment);color:var(--payment)}
+
+.btn{
+  display:inline-block;border:none;border-radius:10px;padding:10px 22px;cursor:pointer;
+  font-family:inherit;font-size:.93rem;font-weight:700;transition:filter .12s;
+}
+.btn:hover{filter:brightness(1.07)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-ghost{background:transparent;border:1.5px solid var(--line);color:var(--muted)}
+.btn-danger{background:var(--expense);color:#fff}
+.btn-sm{padding:5px 12px;font-size:.8rem;border-radius:8px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* ---------- tables ---------- */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:640px}
+table.compact{min-width:0}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--primary-soft);color:var(--primary);font-weight:700;font-size:.82rem}
+tr:hover td{background:#FAF8F2}
+td.desc-cell{white-space:normal;min-width:140px;max-width:320px}
+tr.total-row td{background:#F3F0E7;font-weight:800;border-top:2px solid var(--gold)}
+.t-income{color:var(--income);font-weight:700}
+.t-expense{color:var(--expense);font-weight:700}
+.t-payment{color:var(--payment);font-weight:700}
+.t-neg{color:var(--expense)}
+.badge{display:inline-block;border-radius:6px;padding:1px 9px;font-size:.76rem;font-weight:700}
+.badge.income{background:var(--income-soft);color:var(--income)}
+.badge.expense{background:var(--expense-soft);color:var(--expense)}
+.badge.payment{background:var(--payment-soft);color:var(--payment)}
+.row-actions button{background:none;border:none;cursor:pointer;font-size:1rem;padding:2px 5px}
+
+.filters{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px}
+@media(max-width:900px){.filters{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.filters{grid-template-columns:1fr 1fr}}
+
+.mini-bars .mb-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:.85rem}
+.mini-bars .mb-name{flex:0 0 130px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini-bars .mb-track{flex:1;background:#F0EDE4;border-radius:6px;height:14px;overflow:hidden}
+.mini-bars .mb-fill{height:100%;border-radius:6px;background:var(--expense)}
+.mini-bars .mb-val{flex:0 0 auto;font-weight:700;font-size:.8rem}
+
+.empty-note{color:var(--muted);font-size:.88rem;text-align:center;padding:18px 8px}
+
+/* ---------- charts ---------- */
+.chart-box svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:.82rem}
+.legend .lg-item{display:flex;align-items:center;gap:6px}
+.legend .lg-dot{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+
+/* ---------- settings lists ---------- */
+.item-list{list-style:none}
+.item-list li{display:flex;justify-content:space-between;align-items:center;padding:7px 4px;border-bottom:1px dashed var(--line);font-size:.9rem}
+.item-list li:last-child{border-bottom:none}
+.inline-form{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.inline-form input,.inline-form select{flex:1;min-width:140px}
+.inline-form .btn{flex:0 0 auto}
+
+/* ---------- help ---------- */
+.help p{margin-bottom:10px;text-align:justify}
+.help ol,.help ul{margin:0 22px 12px 0}
+.help li{margin-bottom:6px}
+.help .tip{background:var(--primary-soft);border-inline-start:4px solid var(--primary);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:.9rem}
+.help .warn{background:#FBF1DE;border-inline-start:4px solid var(--payment);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:.9rem}
+kbd{background:#EFECE3;border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-family:inherit;font-size:.82rem}
+
+footer{max-width:1080px;margin:0 auto 26px;padding:0 12px;color:var(--muted);font-size:.78rem;text-align:center}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <h1>دفتر حساب</h1>
+      <span class="tagline">مدیریت مالی شخصی — دریافتی، پرداختی و هزینه‌ها</span>
+    </div>
+    <div class="today-box">
+      <div>امروز</div>
+      <b id="todayLabel">—</b>
+    </div>
+  </div>
+</header>
+
+<div id="backupBanner" class="banner hidden">
+  <span>⚠️ از آخرین پشتیبان‌گیری، تراکنش‌های جدیدی ثبت یا ویرایش شده‌اند. برای انتقال به سایر دستگاه‌ها، فایل پشتیبان بگیرید.</span>
+  <button id="bannerExportBtn">تهیه فایل پشتیبان</button>
+</div>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="dashboard" class="active">داشبورد</button>
+  <button data-tab="add">ثبت تراکنش</button>
+  <button data-tab="list">تراکنش‌ها</button>
+  <button data-tab="reports">گزارش‌ها</button>
+  <button data-tab="charts">نمودارها</button>
+  <button data-tab="settings">پشتیبان و تنظیمات</button>
+  <button data-tab="help">راهنما</button>
+</nav>
+
+<main>
+
+<!-- ============ داشبورد ============ -->
+<section id="tab-dashboard" class="tab-panel active">
+  <div class="grid grid-4" id="dashStats"></div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>موجودی حساب‌ها</h2>
+    <div class="chips" id="dashBalances"></div>
+    <div style="margin-top:10px;font-size:.9rem" id="dashTotalBalance"></div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>بیشترین هزینه‌های ماه جاری</h2>
+      <div class="mini-bars" id="dashTopCats"></div>
+    </div>
+    <div class="card">
+      <h2>آخرین تراکنش‌ها</h2>
+      <div class="table-wrap"><table class="compact" style="min-width:0" id="dashRecent"></table></div>
+    </div>
+  </div>
+
+  <div class="card" style="font-size:.85rem;color:var(--muted)" id="dashBackupInfo"></div>
+</section>
+
+<!-- ============ ثبت تراکنش ============ -->
+<section id="tab-add" class="tab-panel">
+  <div class="card">
+    <h2 id="addFormTitle">ثبت تراکنش جدید</h2>
+
+    <div class="type-pills" id="typePills">
+      <label class="p-income checked"><input type="radio" name="txType" value="income" checked>دریافتی (درآمد)</label>
+      <label class="p-expense"><input type="radio" name="txType" value="expense">هزینه</label>
+      <label class="p-payment"><input type="radio" name="txType" value="payment">پرداختی</label>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label class="f-label">مبلغ (<span class="currency-label">تومان</span>)</label>
+        <input type="text" id="fAmount" inputmode="numeric" placeholder="مثلاً ۲٬۵۰۰٬۰۰۰" autocomplete="off">
+      </div>
+      <div>
+        <label class="f-label">تاریخ (شمسی)</label>
+        <div class="date-triplet">
+          <select id="fDay"></select>
+          <select id="fMonth"></select>
+          <select id="fYear"></select>
+        </div>
+      </div>
+      <div>
+        <label class="f-label">دسته‌بندی</label>
+        <select id="fCategory"></select>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label class="f-label">حساب</label>
+        <select id="fAccount"></select>
+      </div>
+      <div style="grid-column:span 2">
+        <label class="f-label">شرح (اختیاری)</label>
+        <input type="text" id="fDesc" placeholder="مثلاً خرید هفتگی فروشگاه" autocomplete="off">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="btnSaveTx">ثبت تراکنش</button>
+    <button class="btn btn-ghost hidden" id="btnCancelEdit">انصراف از ویرایش</button>
+    <span id="addMsg" style="margin-inline-start:12px;font-size:.85rem;color:var(--income)"></span>
+  </div>
+</section>
+
+<!-- ============ فهرست تراکنش‌ها ============ -->
+<section id="tab-list" class="tab-panel">
+  <div class="card">
+    <h2>فهرست تراکنش‌ها</h2>
+    <div class="filters">
+      <select id="flType">
+        <option value="">همه انواع</option>
+        <option value="income">دریافتی</option>
+        <option value="expense">هزینه</option>
+        <option value="payment">پرداختی</option>
+      </select>
+      <select id="flYear"><option value="">همه سال‌ها</option></select>
+      <select id="flMonth"><option value="">همه ماه‌ها</option></select>
+      <select id="flCategory"><option value="">همه دسته‌ها</option></select>
+      <select id="flAccount"><option value="">همه حساب‌ها</option></select>
+      <input type="text" id="flSearch" placeholder="جستجو در شرح…">
+    </div>
+    <div class="table-wrap"><table id="txTable"></table></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;flex-wrap:wrap;gap:10px">
+      <span style="font-size:.85rem;color:var(--muted)" id="txListSummary"></span>
+      <button class="btn btn-ghost btn-sm" id="btnCsvTx">خروجی CSV (اکسل)</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ گزارش‌ها ============ -->
+<section id="tab-reports" class="tab-panel">
+  <div class="card">
+    <h2>گزارش ماهانه سال
+      <select id="rpYear" style="width:auto;display:inline-block;margin-inline-start:8px"></select>
+    </h2>
+    <div class="table-wrap"><table id="rpMonthlyTable"></table></div>
+    <div style="margin-top:10px"><button class="btn btn-ghost btn-sm" id="btnCsvMonthly">خروجی CSV گزارش ماهانه</button></div>
+  </div>
+
+  <div class="card">
+    <h2>گزارش به تفکیک دسته‌بندی</h2>
+    <div class="filters" style="grid-template-columns:repeat(3,1fr)">
+      <select id="rcType">
+        <option value="expense">هزینه‌ها</option>
+        <option value="income">دریافتی‌ها</option>
+        <option value="payment">پرداختی‌ها</option>
+      </select>
+      <select id="rcYear"></select>
+      <select id="rcMonth"><option value="0">کل سال</option></select>
+    </div>
+    <div class="table-wrap"><table id="rpCatTable"></table></div>
+  </div>
+
+  <div class="card">
+    <h2>گزارش بازه دلخواه</h2>
+    <div class="grid grid-2" style="margin-bottom:12px">
+      <div>
+        <label class="f-label">از تاریخ</label>
+        <div class="date-triplet"><select id="rgFromD"></select><select id="rgFromM"></select><select id="rgFromY"></select></div>
+      </div>
+      <div>
+        <label class="f-label">تا تاریخ</label>
+        <div class="date-triplet"><select id="rgToD"></select><select id="rgToM"></select><select id="rgToY"></select></div>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" id="btnRangeReport">محاسبه</button>
+    <div id="rangeResult" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- ============ نمودارها ============ -->
+<section id="tab-charts" class="tab-panel">
+  <div class="card">
+    <h2>نمودارهای سال
+      <select id="chYear" style="width:auto;display:inline-block;margin-inline-start:8px"></select>
+    </h2>
+    <p style="font-size:.85rem;color:var(--muted)">همه نمودارها بر اساس داده‌های ثبت‌شده و بدون نیاز به اینترنت رسم می‌شوند.</p>
+  </div>
+
+  <div class="card chart-box">
+    <h2>سهم دسته‌ها از هزینه‌ها
+      <select id="chPieMonth" style="width:auto;display:inline-block;margin-inline-start:8px;font-size:.85rem"><option value="0">کل سال</option></select>
+    </h2>
+    <div id="pieChart"></div>
+  </div>
+
+  <div class="card chart-box">
+    <h2>دریافتی در برابر خروجی (هزینه + پرداختی) — ماه به ماه</h2>
+    <div id="barChart"></div>
+  </div>
+
+  <div class="card chart-box">
+    <h2>روند پس‌انداز تجمعی در طول سال</h2>
+    <div id="lineChart"></div>
+  </div>
+</section>
+
+<!-- ============ پشتیبان و تنظیمات ============ -->
+<section id="tab-settings" class="tab-panel">
+  <div class="card">
+    <h2>پشتیبان‌گیری و همگام‌سازی بین دستگاه‌ها</h2>
+    <p style="font-size:.9rem;margin-bottom:12px">
+      داده‌ها به‌صورت خودکار در حافظه مرورگر همین دستگاه ذخیره می‌شوند. برای انتقال به دستگاه دیگر (یا اطمینان از حفظ داده‌ها)، فایل پشتیبان بگیرید و آن را در گوگل درایو کنار فایل برنامه نگه دارید. روش کامل در برگه «راهنما» توضیح داده شده است.
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-gold" id="btnExportJson">📤 تهیه فایل پشتیبان (JSON)</button>
+      <button class="btn btn-primary" id="btnImportMerge">📥 بازیابی با ادغام هوشمند</button>
+      <button class="btn btn-ghost" id="btnImportReplace">بازیابی با جایگزینی کامل</button>
+      <input type="file" id="importFile" accept=".json,application/json" class="hidden">
+    </div>
+    <div style="margin-top:12px;font-size:.85rem;color:var(--muted)" id="backupStatus"></div>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>حساب‌ها</h2>
+      <ul class="item-list" id="accountList"></ul>
+      <div class="inline-form">
+        <input type="text" id="newAccName" placeholder="نام حساب (مثلاً بانک ملت)">
+        <input type="text" id="newAccInit" inputmode="numeric" placeholder="موجودی اولیه">
+        <button class="btn btn-primary btn-sm" id="btnAddAccount">افزودن</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>دسته‌بندی‌ها</h2>
+      <select id="catTypeSel" style="margin-bottom:10px">
+        <option value="income">دسته‌های دریافتی</option>
+        <option value="expense">دسته‌های هزینه</option>
+        <option value="payment">دسته‌های پرداختی</option>
+      </select>
+      <ul class="item-list" id="categoryList"></ul>
+      <div class="inline-form">
+        <input type="text" id="newCatName" placeholder="نام دسته جدید">
+        <button class="btn btn-primary btn-sm" id="btnAddCategory">افزودن</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>تنظیمات نمایش</h2>
+    <div class="inline-form" style="align-items:center">
+      <label class="f-label" style="margin:0">واحد پول:</label>
+      <select id="setCurrency" style="max-width:180px">
+        <option value="تومان">تومان</option>
+        <option value="ریال">ریال</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#EAC7C7">
+    <h2 style="color:var(--expense)">منطقه خطر</h2>
+    <p style="font-size:.85rem;margin-bottom:10px">حذف کامل همه داده‌ها از این دستگاه. پیش از این کار حتماً فایل پشتیبان تهیه کنید.</p>
+    <button class="btn btn-danger btn-sm" id="btnWipe">پاک‌کردن همه داده‌ها</button>
+  </div>
+</section>
+
+<!-- ============ راهنما ============ -->
+<section id="tab-help" class="tab-panel">
+  <div class="card help">
+    <h2>راهنمای کامل استفاده</h2>
+
+    <h3>۱) شروع کار</h3>
+    <p>این برنامه یک فایل HTML مستقل است و کاملاً آفلاین کار می‌کند؛ به اینترنت، نصب یا ثبت‌نام نیاز ندارد. کافی است فایل را در هر مرورگری (کروم، فایرفاکس، سافاری و…) باز کنید. هر تراکنشی که ثبت کنید، بلافاصله و خودکار در حافظه مرورگر همان دستگاه ذخیره می‌شود؛ حتی اگر مرورگر را ببندید، با باز کردن دوباره فایل، همه داده‌ها سر جای خود هستند.</p>
+
+    <h3>۲) ثبت تراکنش</h3>
+    <ol>
+      <li>به برگه «ثبت تراکنش» بروید.</li>
+      <li>نوع را انتخاب کنید: <b>دریافتی</b> (حقوق، درآمد فروش و…)، <b>هزینه</b> (خوراک، قبوض و…) یا <b>پرداختی</b> (قسط وام، بازپرداخت بدهی و…). هر دو مورد هزینه و پرداختی از موجودی کم می‌شوند، اما در گزارش‌ها جدا نمایش داده می‌شوند تا مخارج مصرفی از تعهدات مالی تفکیک شود.</li>
+      <li>مبلغ را وارد کنید (جداکننده هزارگان خودکار اعمال می‌شود)، تاریخ شمسی، دسته‌بندی و حساب را انتخاب کنید و در صورت تمایل شرح بنویسید.</li>
+      <li>دکمه «ثبت تراکنش» را بزنید. همین!</li>
+    </ol>
+
+    <h3>۳) ویرایش و حذف</h3>
+    <p>در برگه «تراکنش‌ها» فهرست کامل با امکان فیلتر (نوع، سال، ماه، دسته، حساب) و جستجو در شرح را می‌بینید. با دکمه ✏️ هر ردیف را ویرایش و با 🗑️ حذف کنید.</p>
+
+    <h3>۴) گزارش‌ها و نمودارها</h3>
+    <ul>
+      <li><b>گزارش ماهانه:</b> برای هر ماه سالِ انتخابی، جمع دریافتی، هزینه، پرداختی، پس‌انداز و نرخ پس‌انداز (نسبت پس‌انداز به دریافتی) محاسبه می‌شود.</li>
+      <li><b>گزارش دسته‌بندی:</b> سهم هر دسته از دریافتی/هزینه/پرداختی در ماه یا کل سال.</li>
+      <li><b>گزارش بازه دلخواه:</b> جمع‌ها بین هر دو تاریخ شمسی دلخواه.</li>
+      <li><b>نمودارها:</b> دایره‌ای (سهم دسته‌ها از هزینه)، میله‌ای (دریافتی در برابر خروجی ماهانه) و خطی (پس‌انداز تجمعی).</li>
+      <li><b>خروجی CSV:</b> فهرست تراکنش‌ها و گزارش ماهانه را می‌توانید به‌صورت فایل CSV بگیرید و مستقیم در اکسل باز کنید.</li>
+    </ul>
+
+    <h3>۵) استفاده روی چند دستگاه با گوگل درایو (مهم)</h3>
+    <p>مرورگرها به هیچ صفحه‌ای اجازه نمی‌دهند فایل خودش را بازنویسی کند؛ بنابراین داده‌ها «داخل» فایل HTML ذخیره نمی‌شوند، بلکه در حافظه مرورگرِ هر دستگاه می‌مانند. برای همگام‌سازی بین لپ‌تاپ، گوشی و تبلت، از فایل پشتیبان JSON استفاده کنید:</p>
+    <div class="tip">
+      <b>راه‌اندازی اولیه (یک بار):</b><br>
+      ۱. فایل <kbd>hesabdar.html</kbd> را در گوگل درایو آپلود کنید.<br>
+      ۲. روی هر دستگاه یک بار فایل را از درایو <b>دانلود</b> کنید و در جای مشخصی نگه دارید (مثلاً پوشه دانلودها). از این به بعد روی هر دستگاه همان نسخه محلی را باز می‌کنید — چون درایو فایل‌های HTML را مستقیم اجرا نمی‌کند و داده‌های شما هم به مرورگر همان دستگاه وابسته است.
+    </div>
+    <div class="tip">
+      <b>چرخه کاری روزانه (مثال شما):</b><br>
+      ۱. امروز با <b>لپ‌تاپ</b> هزینه‌ها را ثبت می‌کنید. در پایان کار، در برگه «پشتیبان و تنظیمات» دکمه «تهیه فایل پشتیبان» را می‌زنید و فایل JSON دریافتی را در گوگل درایو آپلود می‌کنید (نسخه قبلی را جایگزین کنید).<br>
+      ۲. فردا با <b>گوشی</b> فایل پشتیبان را از درایو دانلود می‌کنید، برنامه را باز کرده و «بازیابی با ادغام هوشمند» را می‌زنید و همان فایل را انتخاب می‌کنید. حالا همه تراکنش‌های دیروز روی گوشی هم هست.<br>
+      ۳. هزینه جدید را با گوشی ثبت می‌کنید و در پایان، دوباره پشتیبان می‌گیرید و در درایو آپلود می‌کنید. این چرخه را روی هر دستگاهی تکرار کنید: <b>اول بازیابی، در پایان پشتیبان‌گیری.</b>
+    </div>
+    <p><b>ادغام هوشمند</b> تراکنش‌های فایل پشتیبان را با تراکنش‌های موجود روی دستگاه ترکیب می‌کند (تکراری‌ها دوبار ثبت نمی‌شوند و نسخه جدیدترِ هر تراکنش ویرایش‌شده نگه داشته می‌شود)؛ بنابراین حتی اگر روی دو دستگاه تراکنش‌های متفاوتی ثبت کرده باشید، چیزی از بین نمی‌رود. «جایگزینی کامل» همه داده‌های دستگاه را دور می‌ریزد و دقیقاً محتوای فایل پشتیبان را می‌نشاند.</p>
+    <div class="warn">
+      ⚠️ هر وقت نوار زردرنگ بالای صفحه ظاهر شد، یعنی تغییراتی دارید که هنوز در فایل پشتیبان ذخیره نشده‌اند. پیش از رفتن سراغ دستگاه دیگر، حتماً پشتیبان بگیرید. همچنین «پاک‌کردن تاریخچه/داده‌های مرورگر» می‌تواند داده‌های برنامه را حذف کند — داشتن پشتیبان به‌روز در درایو، بیمه شماست.
+    </div>
+
+    <h3>۶) حساب‌ها و دسته‌بندی‌ها</h3>
+    <p>در برگه «پشتیبان و تنظیمات» می‌توانید حساب‌های خود (نقد، بانک‌ها، کارت‌ها) را با موجودی اولیه تعریف کنید؛ موجودی هر حساب بر اساس تراکنش‌ها به‌روز می‌شود. دسته‌بندی‌های دلخواه نیز برای هر سه نوع تراکنش قابل افزودن است. حساب یا دسته‌ای که تراکنش دارد، برای حفظ سابقه قابل حذف نیست.</p>
+
+    <h3>۷) چند نکته حرفه‌ای</h3>
+    <ul>
+      <li>در پایان هر ماه، «گزارش ماهانه» را ببینید و نرخ پس‌انداز را دنبال کنید؛ هدف‌گذاری روی یک درصد مشخص (مثلاً ۲۰٪) عادت مالی خوبی می‌سازد.</li>
+      <li>برای دقیق‌بودن موجودی‌ها، موجودی اولیه هر حساب را در روز شروع استفاده از برنامه وارد کنید.</li>
+      <li>نام فایل‌های پشتیبان شامل تاریخ شمسی است؛ اگر چند نسخه در درایو نگه دارید، آرشیو زمانی خواهید داشت.</li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer>
+<strong>دفتر حساب</strong><br>
+طراحی و توسعه: <strong>داریوش برزوئی</strong><br>
+© تمامی حقوق مادی و معنوی این نرم‌افزار محفوظ است.<br><br>
+
+📧
+<a href="mailto:Daryooshborzuei@gmail.com">
+Daryooshborzuei@gmail.com
+</a><br>
+
+🎓
+<a href="https://scholar.google.com/citations?user=kKVpJGcAAAAJ&hl=fa"
+   target="_blank"
+   rel="noopener">
+Google Scholar
+</a><br>
+
+🔬
+<a href="https://www.researchgate.net/profile/Daryoosh-Borzuei-2"
+   target="_blank"
+   rel="noopener">
+ResearchGate
+</a><br><br>
+
+این برنامه به‌صورت کاملاً آفلاین اجرا می‌شود؛ تمامی داده‌ها فقط روی دستگاه شما ذخیره شده و هیچ اطلاعاتی به اینترنت ارسال نمی‌شود.
+</footer>
+
+<script>
+"use strict";
+/* ================= تقویم شمسی (الگوریتم jalaali) ================= */
+function div(a,b){return ~~(a/b);}
+function mod(a,b){return a-~~(a/b)*b;}
+var J_BREAKS=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+function jalCal(jy){
+  var bl=J_BREAKS.length,gy=jy+621,leapJ=-14,jp=J_BREAKS[0],jm,jump=0,leap,leapG,march,n,i;
+  for(i=1;i<bl;i++){jm=J_BREAKS[i];jump=jm-jp;if(jy<jm)break;leapJ+=div(jump,33)*8+div(mod(jump,33),4);jp=jm;}
+  n=jy-jp;
+  leapJ+=div(n,33)*8+div(mod(n,33)+3,4);
+  if(mod(jump,33)===4&&jump-n===4)leapJ+=1;
+  leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150;
+  march=20+leapJ-leapG;
+  if(jump-n<6)n=n-jump+div(jump+4,33)*33;
+  leap=mod(mod(n+1,33)-1,4);
+  if(leap===-1)leap=4;
+  return{leap:leap,gy:gy,march:march};
+}
+function g2d(gy,gm,gd){
+  var d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;
+  return d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752;
+}
+function d2g(jdn){
+  var j=4*jdn+139361631;
+  j=j+div(div(4*jdn+183187720,146097)*3,4)*4-3908;
+  var i=div(mod(j,1461),4)*5+308;
+  var gd=div(mod(i,153),5)+1;
+  var gm=mod(div(i,153),12)+1;
+  var gy=div(j,1461)-100100+div(8-gm,6);
+  return{gy:gy,gm:gm,gd:gd};
+}
+function j2d(jy,jm,jd){var r=jalCal(jy);return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1;}
+function d2j(jdn){
+  var gy=d2g(jdn).gy,jy=gy-621,r=jalCal(jy),jdn1f=g2d(gy,3,r.march),k=jdn-jdn1f,jm,jd;
+  if(k>=0){
+    if(k<=185){jm=1+div(k,31);jd=mod(k,31)+1;return{jy:jy,jm:jm,jd:jd};}
+    k-=186;
+  }else{jy-=1;k+=179;if(r.leap===1)k+=1;}
+  jm=7+div(k,30);jd=mod(k,30)+1;
+  return{jy:jy,jm:jm,jd:jd};
+}
+function toJalaali(gy,gm,gd){return d2j(g2d(gy,gm,gd));}
+function isLeapJalaali(jy){return jalCal(jy).leap===0;}
+function jMonthLen(jy,jm){if(jm<=6)return 31;if(jm<=11)return 30;return isLeapJalaali(jy)?30:29;}
+var J_MONTHS=["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"];
+var J_WEEKDAYS=["یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه","شنبه"];
+function todayJalali(){var n=new Date();return toJalaali(n.getFullYear(),n.getMonth()+1,n.getDate());}
+function dateKey(t){return t.jy*10000+t.jm*100+t.jd;}
+function jDateStr(t){return faNum(t.jy)+"/"+faNum(pad2(t.jm))+"/"+faNum(pad2(t.jd));}
+function pad2(n){return (n<10?"0":"")+n;}
+
+/* ================= اعداد و قالب‌بندی ================= */
+var FA_D="۰۱۲۳۴۵۶۷۸۹";
+function faNum(x){return String(x).replace(/\d/g,function(d){return FA_D[+d];});}
+function enNum(s){return String(s).replace(/[۰-۹]/g,function(d){return String(FA_D.indexOf(d));}).replace(/[٠-٩]/g,function(d){return String("٠١٢٣٤٥٦٧٨٩".indexOf(d));});}
+function fmt(n){
+  n=Math.round(n||0);
+  var neg=n<0;if(neg)n=-n;
+  var s=String(n).replace(/\B(?=(\d{3})+(?!\d))/g,"،");
+  return (neg?"−":"")+faNum(s);
+}
+function fmtC(n){return fmt(n)+" "+DB.settings.currency;}
+function fmtShort(n){
+  var neg=n<0?"−":"";n=Math.abs(n);
+  if(n>=1e9)return neg+faNum((Math.round(n/1e8)/10).toString().replace(".","٫"))+" میلیارد";
+  if(n>=1e6)return neg+faNum((Math.round(n/1e5)/10).toString().replace(".","٫"))+" میلیون";
+  if(n>=1e3)return neg+faNum(Math.round(n/1e3))+" هزار";
+  return neg+faNum(Math.round(n));
+}
+function pct(part,whole){if(!whole)return "—";return faNum(Math.round(part/whole*1000)/10).replace(".","٫")+"٪";}
+function parseAmount(s){var v=parseInt(enNum(s).replace(/[^\d-]/g,""),10);return isNaN(v)?0:v;}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+var TYPE_FA={income:"دریافتی",expense:"هزینه",payment:"پرداختی"};
+
+/* ================= داده‌ها و ذخیره‌سازی ================= */
+var LS_KEY="hesabdar_v1";
+function defaultDB(){
+  return {
+    version:1,
+    settings:{currency:"تومان"},
+    meta:{lastChangeTs:0,lastExportTs:0},
+    accounts:[{id:"acc-cash",name:"نقد",initial:0},{id:"acc-bank",name:"بانک",initial:0}],
+    categories:{
+      income:["حقوق","درآمد کسب‌وکار","سود سپرده","هدیه و عیدی","سایر درآمدها"],
+      expense:["خوراک و رستوران","حمل‌ونقل و سوخت","قبوض و شارژ","خانه و اجاره","پوشاک","درمان و سلامت","آموزش","تفریح و سفر","سایر هزینه‌ها"],
+      payment:["قسط وام","بازپرداخت بدهی","انتقال به پس‌انداز","سایر پرداختی‌ها"]
+    },
+    transactions:[]
+  };
+}
+var DB;
+function loadDB(){
+  try{
+    var raw=localStorage.getItem(LS_KEY);
+    if(raw){var d=JSON.parse(raw);if(d&&Array.isArray(d.transactions)){DB=d;normalizeDB();return;}}
+  }catch(e){}
+  DB=defaultDB();
+}
+function normalizeDB(){
+  var def=defaultDB();
+  DB.settings=DB.settings||def.settings;
+  DB.settings.currency=DB.settings.currency||"تومان";
+  DB.meta=DB.meta||def.meta;
+  DB.accounts=Array.isArray(DB.accounts)&&DB.accounts.length?DB.accounts:def.accounts;
+  DB.categories=DB.categories||def.categories;
+  ["income","expense","payment"].forEach(function(t){if(!Array.isArray(DB.categories[t])||!DB.categories[t].length)DB.categories[t]=def.categories[t];});
+}
+function saveDB(markChange){
+  if(markChange!==false)DB.meta.lastChangeTs=Date.now();
+  try{localStorage.setItem(LS_KEY,JSON.stringify(DB));}
+  catch(e){alert("خطا در ذخیره‌سازی داده‌ها در حافظه مرورگر: "+e.message);}
+  updateBackupBanner();
+}
+
+/* ================= محاسبات ================= */
+function accountBalance(accId){
+  var acc=DB.accounts.find(function(a){return a.id===accId;});
+  var bal=acc?(+acc.initial||0):0;
+  DB.transactions.forEach(function(t){
+    if(t.account!==accId)return;
+    bal+= t.type==="income"? +t.amount : -t.amount;
+  });
+  return bal;
+}
+function sumWhere(fn){
+  var r={income:0,expense:0,payment:0,count:0};
+  DB.transactions.forEach(function(t){if(fn(t)){r[t.type]+=+t.amount;r.count++;}});
+  r.out=r.expense+r.payment;
+  r.saving=r.income-r.out;
+  return r;
+}
+function catSums(type,jy,jm){ /* jm=0 → کل سال */
+  var m={};
+  DB.transactions.forEach(function(t){
+    if(t.type!==type||t.jy!==jy)return;
+    if(jm&&t.jm!==jm)return;
+    m[t.category]=(m[t.category]||0)+(+t.amount);
+  });
+  return Object.keys(m).map(function(k){return{name:k,value:m[k]};}).sort(function(a,b){return b.value-a.value;});
+}
+function yearsInData(){
+  var s={},ty=todayJalali().jy;s[ty]=1;
+  DB.transactions.forEach(function(t){s[t.jy]=1;});
+  return Object.keys(s).map(Number).sort(function(a,b){return b-a;});
+}
+
+/* ================= ابزارهای رابط ================= */
+function $(id){return document.getElementById(id);}
+function fillDateTriplet(dId,mId,yId,init){
+  var ySel=$(yId),mSel=$(mId),dSel=$(dId),tj=todayJalali();
+  var y0=Math.min(1395,tj.jy-5),y1=tj.jy+2,h="";
+  for(var y=y1;y>=y0;y--)h+='<option value="'+y+'">'+faNum(y)+'</option>';
+  ySel.innerHTML=h;
+  h="";
+  for(var m=1;m<=12;m++)h+='<option value="'+m+'">'+J_MONTHS[m-1]+'</option>';
+  mSel.innerHTML=h;
+  function refreshDays(){
+    var len=jMonthLen(+ySel.value,+mSel.value),cur=+dSel.value||1,s="";
+    for(var d=1;d<=len;d++)s+='<option value="'+d+'">'+faNum(d)+'</option>';
+    dSel.innerHTML=s;
+    dSel.value=Math.min(cur,len);
+  }
+  ySel.addEventListener("change",refreshDays);
+  mSel.addEventListener("change",refreshDays);
+  var t=init||tj;
+  ySel.value=t.jy;mSel.value=t.jm;refreshDays();dSel.value=t.jd;
+}
+function setTriplet(dId,mId,yId,t){
+  $(yId).value=t.jy;$(mId).value=t.jm;
+  $(mId).dispatchEvent(new Event("change"));
+  $(dId).value=t.jd;
+}
+function readTriplet(dId,mId,yId){return{jy:+$(yId).value,jm:+$(mId).value,jd:+$(dId).value};}
+function download(name,content,mime){
+  var blob=new Blob([content],{type:mime||"application/octet-stream"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},400);
+}
+
+/* ================= برگه‌ها ================= */
+var tabRenderers={};
+$("tabs").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  switchTab(b.dataset.tab);
+});
+function switchTab(name){
+  document.querySelectorAll("#tabs button").forEach(function(b){b.classList.toggle("active",b.dataset.tab===name);});
+  document.querySelectorAll(".tab-panel").forEach(function(s){s.classList.toggle("active",s.id==="tab-"+name);});
+  if(tabRenderers[name])tabRenderers[name]();
+  window.scrollTo({top:0});
+}
+
+/* ================= فرم ثبت/ویرایش ================= */
+var editingId=null;
+function currentType(){return document.querySelector('input[name="txType"]:checked').value;}
+$("typePills").addEventListener("change",function(){
+  document.querySelectorAll("#typePills label").forEach(function(l){
+    l.classList.toggle("checked",l.querySelector("input").checked);
+  });
+  fillCategorySelect($("fCategory"),currentType());
+});
+function fillCategorySelect(sel,type,withAll){
+  var h=withAll?'<option value="">همه دسته‌ها</option>':"";
+  DB.categories[type].forEach(function(c){h+='<option value="'+esc(c)+'">'+esc(c)+'</option>';});
+  sel.innerHTML=h;
+}
+function fillAccountSelect(sel,withAll){
+  var h=withAll?'<option value="">همه حساب‌ها</option>':"";
+  DB.accounts.forEach(function(a){h+='<option value="'+esc(a.id)+'">'+esc(a.name)+'</option>';});
+  sel.innerHTML=h;
+}
+$("fAmount").addEventListener("input",function(){
+  var v=parseAmount(this.value);
+  this.value=v?fmt(v):"";
+});
+$("btnSaveTx").addEventListener("click",function(){
+  var amount=parseAmount($("fAmount").value);
+  if(amount<=0){alert("مبلغ را وارد کنید.");$("fAmount").focus();return;}
+  if(!$("fCategory").value){alert("دسته‌بندی را انتخاب کنید.");return;}
+  if(!$("fAccount").value){alert("حساب را انتخاب کنید.");return;}
+  var d=readTriplet("fDay","fMonth","fYear");
+  var tx={
+    id:editingId||uid(),
+    type:currentType(),
+    jy:d.jy,jm:d.jm,jd:d.jd,
+    amount:amount,
+    category:$("fCategory").value,
+    account:$("fAccount").value,
+    desc:$("fDesc").value.trim(),
+    ts:Date.now()
+  };
+  if(editingId){
+    var i=DB.transactions.findIndex(function(t){return t.id===editingId;});
+    if(i>-1)DB.transactions[i]=tx;else DB.transactions.push(tx);
+  }else DB.transactions.push(tx);
+  saveDB();
+  var wasEdit=!!editingId;
+  cancelEdit();
+  $("addMsg").textContent=wasEdit?"✓ تراکنش ویرایش شد.":"✓ تراکنش با موفقیت ثبت شد.";
+  setTimeout(function(){$("addMsg").textContent="";},3000);
+  renderDashboard();
+});
+function cancelEdit(){
+  editingId=null;
+  $("addFormTitle").textContent="ثبت تراکنش جدید";
+  $("btnSaveTx").textContent="ثبت تراکنش";
+  $("btnCancelEdit").classList.add("hidden");
+  $("fAmount").value="";$("fDesc").value="";
+  setTriplet("fDay","fMonth","fYear",todayJalali());
+}
+$("btnCancelEdit").addEventListener("click",cancelEdit);
+function startEdit(id){
+  var t=DB.transactions.find(function(x){return x.id===id;});
+  if(!t)return;
+  editingId=id;
+  document.querySelector('input[name="txType"][value="'+t.type+'"]').checked=true;
+  $("typePills").dispatchEvent(new Event("change"));
+  $("fAmount").value=fmt(t.amount);
+  setTriplet("fDay","fMonth","fYear",t);
+  $("fCategory").value=t.category;
+  if(!$("fCategory").value)$("fCategory").selectedIndex=0;
+  $("fAccount").value=t.account;
+  $("fDesc").value=t.desc||"";
+  $("addFormTitle").textContent="ویرایش تراکنش";
+  $("btnSaveTx").textContent="ذخیره ویرایش";
+  $("btnCancelEdit").classList.remove("hidden");
+  switchTab("add");
+}
+function deleteTx(id){
+  var t=DB.transactions.find(function(x){return x.id===id;});
+  if(!t)return;
+  if(!confirm("حذف این تراکنش؟\n"+TYPE_FA[t.type]+" — "+fmt(t.amount)+" — "+jDateStr(t)))return;
+  DB.transactions=DB.transactions.filter(function(x){return x.id!==id;});
+  saveDB();
+  renderTxList();renderDashboard();
+}
+
+/* ================= داشبورد ================= */
+function renderDashboard(){
+  var tj=todayJalali();
+  $("todayLabel").textContent=J_WEEKDAYS[new Date().getDay()]+"، "+faNum(tj.jd)+" "+J_MONTHS[tj.jm-1]+" "+faNum(tj.jy);
+  var m=sumWhere(function(t){return t.jy===tj.jy&&t.jm===tj.jm;});
+  var rate=m.income>0?pct(m.saving,m.income):"—";
+  $("dashStats").innerHTML=
+    '<div class="stat income"><div class="label">دریافتی '+J_MONTHS[tj.jm-1]+'</div><div class="value">'+fmtC(m.income)+'</div><div class="sub">'+faNum(m.count)+' تراکنش در این ماه</div></div>'+
+    '<div class="stat expense"><div class="label">هزینه‌های '+J_MONTHS[tj.jm-1]+'</div><div class="value">'+fmtC(m.expense)+'</div><div class="sub">مخارج مصرفی</div></div>'+
+    '<div class="stat payment"><div class="label">پرداختی‌های '+J_MONTHS[tj.jm-1]+'</div><div class="value">'+fmtC(m.payment)+'</div><div class="sub">اقساط و تعهدات</div></div>'+
+    '<div class="stat saving'+(m.saving<0?" negative":"")+'"><div class="label">پس‌انداز '+J_MONTHS[tj.jm-1]+'</div><div class="value">'+fmtC(m.saving)+'</div><div class="sub">نرخ پس‌انداز: '+rate+'</div></div>';
+  var total=0,chips="";
+  DB.accounts.forEach(function(a){var b=accountBalance(a.id);total+=b;chips+='<span class="chip">'+esc(a.name)+'<small>'+fmt(b)+'</small></span>';});
+  $("dashBalances").innerHTML=chips||'<span class="empty-note">حسابی تعریف نشده است.</span>';
+  $("dashTotalBalance").innerHTML='جمع کل دارایی نقدی: <b style="color:var(--primary)">'+fmtC(total)+'</b>';
+  var cats=catSums("expense",tj.jy,tj.jm).slice(0,6);
+  if(!cats.length)$("dashTopCats").innerHTML='<div class="empty-note">در این ماه هزینه‌ای ثبت نشده است.</div>';
+  else{
+    var mx=cats[0].value,h="";
+    cats.forEach(function(c){
+      h+='<div class="mb-row"><span class="mb-name" title="'+esc(c.name)+'">'+esc(c.name)+'</span>'+
+         '<span class="mb-track"><span class="mb-fill" style="width:'+Math.max(4,Math.round(c.value/mx*100))+'%"></span></span>'+
+         '<span class="mb-val">'+fmt(c.value)+'</span></div>';
+    });
+    $("dashTopCats").innerHTML=h;
+  }
+  var recent=DB.transactions.slice().sort(function(a,b){return dateKey(b)-dateKey(a)||b.ts-a.ts;}).slice(0,8);
+  if(!recent.length)$("dashRecent").innerHTML='<tr><td class="empty-note" style="border:none">هنوز تراکنشی ثبت نشده — از برگه «ثبت تراکنش» شروع کنید.</td></tr>';
+  else{
+    var rh="";
+    recent.forEach(function(t){
+      rh+='<tr><td><span class="badge '+t.type+'">'+TYPE_FA[t.type]+'</span></td>'+
+          '<td>'+jDateStr(t)+'</td><td class="t-'+t.type+'">'+fmt(t.amount)+'</td>'+
+          '<td class="desc-cell" style="color:var(--muted);font-size:.82rem">'+esc(t.category)+(t.desc?" — "+esc(t.desc):"")+'</td></tr>';
+    });
+    $("dashRecent").innerHTML=rh;
+  }
+  var bi;
+  if(!DB.meta.lastExportTs)bi="🗂️ هنوز فایل پشتیبان تهیه نکرده‌اید. برای انتقال داده‌ها بین دستگاه‌ها، از برگه «پشتیبان و تنظیمات» استفاده کنید.";
+  else{
+    var d=new Date(DB.meta.lastExportTs),j=toJalaali(d.getFullYear(),d.getMonth()+1,d.getDate());
+    bi="🗂️ آخرین پشتیبان‌گیری: "+jDateStr(j)+" ساعت "+faNum(pad2(d.getHours()))+":"+faNum(pad2(d.getMinutes()));
+    if(DB.meta.lastChangeTs>DB.meta.lastExportTs)bi+=" — <b style='color:var(--payment)'>تغییرات جدید هنوز پشتیبان‌گیری نشده‌اند.</b>";
+  }
+  $("dashBackupInfo").innerHTML=bi;
+  updateBackupBanner();
+}
+function updateBackupBanner(){
+  var show=DB.transactions.length>0&&DB.meta.lastChangeTs>DB.meta.lastExportTs;
+  $("backupBanner").classList.toggle("hidden",!show);
+}
+
+/* ================= فهرست تراکنش‌ها ================= */
+function fillListFilters(){
+  var ys=yearsInData(),h='<option value="">همه سال‌ها</option>';
+  ys.forEach(function(y){h+='<option value="'+y+'">'+faNum(y)+'</option>';});
+  $("flYear").innerHTML=h;
+  h='<option value="">همه ماه‌ها</option>';
+  for(var m=1;m<=12;m++)h+='<option value="'+m+'">'+J_MONTHS[m-1]+'</option>';
+  $("flMonth").innerHTML=h;
+  var all=[].concat(DB.categories.income,DB.categories.expense,DB.categories.payment);
+  all=all.filter(function(c,i){return all.indexOf(c)===i;});
+  h='<option value="">همه دسته‌ها</option>';
+  all.forEach(function(c){h+='<option value="'+esc(c)+'">'+esc(c)+'</option>';});
+  $("flCategory").innerHTML=h;
+  fillAccountSelect($("flAccount"),true);
+}
+function filteredTx(){
+  var ty=$("flType").value,y=+$("flYear").value||0,m=+$("flMonth").value||0,
+      c=$("flCategory").value,a=$("flAccount").value,q=$("flSearch").value.trim();
+  return DB.transactions.filter(function(t){
+    if(ty&&t.type!==ty)return false;
+    if(y&&t.jy!==y)return false;
+    if(m&&t.jm!==m)return false;
+    if(c&&t.category!==c)return false;
+    if(a&&t.account!==a)return false;
+    if(q&&(t.desc||"").indexOf(q)===-1&&t.category.indexOf(q)===-1)return false;
+    return true;
+  }).sort(function(x,z){return dateKey(z)-dateKey(x)||z.ts-x.ts;});
+}
+function accName(id){var a=DB.accounts.find(function(x){return x.id===id;});return a?a.name:"—";}
+function renderTxList(){
+  var list=filteredTx();
+  if(!list.length){$("txTable").innerHTML='<tr><td class="empty-note" style="border:none">تراکنشی مطابق فیلترها یافت نشد.</td></tr>';$("txListSummary").textContent="";return;}
+  var h='<tr><th>ردیف</th><th>نوع</th><th>تاریخ</th><th>مبلغ</th><th>دسته</th><th>حساب</th><th>شرح</th><th></th></tr>';
+  var sums={income:0,expense:0,payment:0};
+  list.forEach(function(t,i){
+    sums[t.type]+=+t.amount;
+    h+='<tr><td>'+faNum(i+1)+'</td>'+
+       '<td><span class="badge '+t.type+'">'+TYPE_FA[t.type]+'</span></td>'+
+       '<td>'+jDateStr(t)+'</td>'+
+       '<td class="t-'+t.type+'">'+fmt(t.amount)+'</td>'+
+       '<td>'+esc(t.category)+'</td><td>'+esc(accName(t.account))+'</td>'+
+       '<td class="desc-cell">'+esc(t.desc||"")+'</td>'+
+       '<td class="row-actions"><button title="ویرایش" onclick="startEdit(\''+t.id+'\')">✏️</button><button title="حذف" onclick="deleteTx(\''+t.id+'\')">🗑️</button></td></tr>';
+  });
+  $("txTable").innerHTML=h;
+  $("txListSummary").textContent=faNum(list.length)+" تراکنش — دریافتی: "+fmt(sums.income)+" | هزینه: "+fmt(sums.expense)+" | پرداختی: "+fmt(sums.payment)+" ("+DB.settings.currency+")";
+}
+["flType","flYear","flMonth","flCategory","flAccount"].forEach(function(id){$(id).addEventListener("change",renderTxList);});
+$("flSearch").addEventListener("input",renderTxList);
+
+/* ================= گزارش‌ها ================= */
+function fillYearSelect(id){
+  var h="";yearsInData().forEach(function(y){h+='<option value="'+y+'">'+faNum(y)+'</option>';});
+  var cur=$(id).value;$(id).innerHTML=h;
+  if(cur&&[].some.call($(id).options,function(o){return o.value===cur;}))$(id).value=cur;
+}
+function monthlyRows(jy){
+  var rows=[];
+  for(var m=1;m<=12;m++){
+    var s=sumWhere(function(t){return t.jy===jy&&t.jm===m;});
+    rows.push({m:m,income:s.income,expense:s.expense,payment:s.payment,saving:s.saving});
+  }
+  return rows;
+}
+function renderMonthlyReport(){
+  var jy=+$("rpYear").value||todayJalali().jy;
+  var rows=monthlyRows(jy),tot={income:0,expense:0,payment:0,saving:0};
+  var h='<tr><th>ماه</th><th>دریافتی</th><th>هزینه</th><th>پرداختی</th><th>پس‌انداز</th><th>نرخ پس‌انداز</th></tr>';
+  rows.forEach(function(r){
+    tot.income+=r.income;tot.expense+=r.expense;tot.payment+=r.payment;tot.saving+=r.saving;
+    var empty=!r.income&&!r.expense&&!r.payment;
+    h+='<tr'+(empty?' style="opacity:.45"':'')+'><td>'+J_MONTHS[r.m-1]+'</td>'+
+       '<td class="t-income">'+fmt(r.income)+'</td>'+
+       '<td class="t-expense">'+fmt(r.expense)+'</td>'+
+       '<td class="t-payment">'+fmt(r.payment)+'</td>'+
+       '<td class="'+(r.saving<0?"t-neg":"")+'" style="font-weight:700">'+fmt(r.saving)+'</td>'+
+       '<td>'+(r.income>0?pct(r.saving,r.income):"—")+'</td></tr>';
+  });
+  h+='<tr class="total-row"><td>جمع سال '+faNum(jy)+'</td><td>'+fmt(tot.income)+'</td><td>'+fmt(tot.expense)+'</td><td>'+fmt(tot.payment)+'</td><td class="'+(tot.saving<0?"t-neg":"")+'">'+fmt(tot.saving)+'</td><td>'+(tot.income>0?pct(tot.saving,tot.income):"—")+'</td></tr>';
+  $("rpMonthlyTable").innerHTML=h;
+}
+function renderCatReport(){
+  var type=$("rcType").value,jy=+$("rcYear").value||todayJalali().jy,jm=+$("rcMonth").value||0;
+  var data=catSums(type,jy,jm),total=data.reduce(function(s,d){return s+d.value;},0);
+  if(!data.length){$("rpCatTable").innerHTML='<tr><td class="empty-note" style="border:none">در این بازه، '+TYPE_FA[type]+' ثبت نشده است.</td></tr>';return;}
+  var h='<tr><th>دسته‌بندی</th><th>مبلغ</th><th>سهم</th></tr>';
+  data.forEach(function(d){h+='<tr><td>'+esc(d.name)+'</td><td class="t-'+type+'">'+fmt(d.value)+'</td><td>'+pct(d.value,total)+'</td></tr>';});
+  h+='<tr class="total-row"><td>جمع</td><td>'+fmt(total)+'</td><td>۱۰۰٪</td></tr>';
+  $("rpCatTable").innerHTML=h;
+}
+function renderRangeReport(){
+  var f=readTriplet("rgFromD","rgFromM","rgFromY"),t=readTriplet("rgToD","rgToM","rgToY");
+  var kf=dateKey(f),kt=dateKey(t);
+  if(kf>kt){alert("تاریخ شروع بعد از تاریخ پایان است.");return;}
+  var s=sumWhere(function(x){var k=dateKey(x);return k>=kf&&k<=kt;});
+  $("rangeResult").innerHTML=
+    '<p style="font-size:.85rem;color:var(--muted)">از '+jDateStr(f)+' تا '+jDateStr(t)+' — '+faNum(s.count)+' تراکنش</p>'+
+    '<div class="grid grid-4">'+
+    '<div class="stat income"><div class="label">دریافتی</div><div class="value">'+fmtC(s.income)+'</div></div>'+
+    '<div class="stat expense"><div class="label">هزینه</div><div class="value">'+fmtC(s.expense)+'</div></div>'+
+    '<div class="stat payment"><div class="label">پرداختی</div><div class="value">'+fmtC(s.payment)+'</div></div>'+
+    '<div class="stat saving'+(s.saving<0?" negative":"")+'"><div class="label">پس‌انداز</div><div class="value">'+fmtC(s.saving)+'</div><div class="sub">'+(s.income>0?"نرخ: "+pct(s.saving,s.income):"")+'</div></div></div>';
+}
+$("rpYear").addEventListener("change",renderMonthlyReport);
+["rcType","rcYear","rcMonth"].forEach(function(id){$(id).addEventListener("change",renderCatReport);});
+$("btnRangeReport").addEventListener("click",renderRangeReport);
+
+/* ================= خروجی CSV ================= */
+function csvCell(s){s=String(s==null?"":s);return '"'+s.replace(/"/g,'""')+'"';}
+$("btnCsvTx").addEventListener("click",function(){
+  var list=filteredTx();
+  if(!list.length){alert("تراکنشی برای خروجی وجود ندارد.");return;}
+  var rows=[["ردیف","نوع","تاریخ شمسی","مبلغ ("+DB.settings.currency+")","دسته‌بندی","حساب","شرح"]];
+  list.forEach(function(t,i){
+    rows.push([i+1,TYPE_FA[t.type],t.jy+"/"+pad2(t.jm)+"/"+pad2(t.jd),t.amount,t.category,accName(t.account),t.desc||""]);
+  });
+  var csv="\uFEFF"+rows.map(function(r){return r.map(csvCell).join(",");}).join("\r\n");
+  var tj=todayJalali();
+  download("tarakonesh-"+tj.jy+"-"+pad2(tj.jm)+"-"+pad2(tj.jd)+".csv",csv,"text/csv;charset=utf-8");
+});
+$("btnCsvMonthly").addEventListener("click",function(){
+  var jy=+$("rpYear").value||todayJalali().jy,rows=[["ماه","دریافتی","هزینه","پرداختی","پس‌انداز"]];
+  monthlyRows(jy).forEach(function(r){rows.push([J_MONTHS[r.m-1],r.income,r.expense,r.payment,r.saving]);});
+  var csv="\uFEFF"+rows.map(function(r){return r.map(csvCell).join(",");}).join("\r\n");
+  download("gozaresh-mahane-"+jy+".csv",csv,"text/csv;charset=utf-8");
+});
+
+/* ================= نمودارها (SVG خالص) ================= */
+var PALETTE=["#0E5F52","#C94747","#C07E0A","#3B6FB5","#7C5CBF","#C2417F","#5B8C2A","#8A6D3B","#3AA6A6","#A0522D","#607D8B","#4E4A72"];
+function svgOpen(w,h){return '<svg viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg" role="img">';}
+function renderPie(){
+  var jy=+$("chYear").value||todayJalali().jy,jm=+$("chPieMonth").value||0;
+  var data=catSums("expense",jy,jm);
+  var box=$("pieChart");
+  if(!data.length){box.innerHTML='<div class="empty-note">هزینه‌ای در این بازه ثبت نشده است.</div>';return;}
+  if(data.length>8){
+    var rest=data.slice(7).reduce(function(s,d){return s+d.value;},0);
+    data=data.slice(0,7);data.push({name:"سایر",value:rest});
+  }
+  var total=data.reduce(function(s,d){return s+d.value;},0);
+  var cx=150,cy=150,R=110,a0=-Math.PI/2,svg=svgOpen(300,300);
+  if(data.length===1){
+    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="'+PALETTE[0]+'"/>';
+  }else data.forEach(function(d,i){
+    var frac=d.value/total,a1=a0+frac*2*Math.PI;
+    var x0=cx+R*Math.cos(a0),y0=cy+R*Math.sin(a0),x1=cx+R*Math.cos(a1),y1=cy+R*Math.sin(a1);
+    var large=frac>.5?1:0;
+    svg+='<path d="M'+cx+' '+cy+' L'+x0.toFixed(2)+' '+y0.toFixed(2)+' A'+R+' '+R+' 0 '+large+' 1 '+x1.toFixed(2)+' '+y1.toFixed(2)+' Z" fill="'+PALETTE[i%PALETTE.length]+'" stroke="#fff" stroke-width="2"/>';
+    a0=a1;
+  });
+  svg+='<circle cx="'+cx+'" cy="'+cy+'" r="52" fill="#fff"/>';
+  svg+='<text x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" font-size="13" fill="#71808C" font-family="inherit">جمع هزینه</text>';
+  svg+='<text x="'+cx+'" y="'+(cy+18)+'" text-anchor="middle" font-size="15" font-weight="bold" fill="#22303A" font-family="inherit">'+fmtShort(total)+'</text>';
+  svg+='</svg>';
+  var legend='<div class="legend">';
+  data.forEach(function(d,i){
+    legend+='<span class="lg-item"><span class="lg-dot" style="background:'+PALETTE[i%PALETTE.length]+'"></span>'+esc(d.name)+' — '+fmt(d.value)+' ('+pct(d.value,total)+')</span>';
+  });
+  legend+='</div>';
+  box.innerHTML='<div style="max-width:340px;margin:0 auto">'+svg+'</div>'+legend;
+}
+function niceMax(v){
+  if(v<=0)return 1;
+  var p=Math.pow(10,Math.floor(Math.log10(v)));
+  var n=v/p;
+  var m=n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10;
+  return m*p;
+}
+function renderBar(){
+  var jy=+$("chYear").value||todayJalali().jy,rows=monthlyRows(jy);
+  var mx=niceMax(Math.max.apply(null,rows.map(function(r){return Math.max(r.income,r.expense+r.payment);}).concat([1])));
+  var W=960,H=340,padL=14,padR=86,padT=16,padB=44,cw=(W-padL-padR)/12;
+  var svg=svgOpen(W,H);
+  for(var g=0;g<=4;g++){
+    var yv=mx*g/4,y=H-padB-(H-padT-padB)*g/4;
+    svg+='<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="#E4E0D5" stroke-width="1"/>';
+    svg+='<text x="'+(W-padR+8)+'" y="'+(y+4)+'" font-size="12" fill="#71808C" font-family="inherit">'+fmtShort(yv)+'</text>';
+  }
+  rows.forEach(function(r,i){
+    var x=padL+(11-i)*cw; /* راست‌به‌چپ: فروردین سمت راست */
+    var bw=Math.min(20,cw*.3),gap=4;
+    var hIn=(H-padT-padB)*(r.income/mx),hOut=(H-padT-padB)*((r.expense+r.payment)/mx);
+    var cxm=x+cw/2;
+    svg+='<rect x="'+(cxm-bw-gap/2)+'" y="'+(H-padB-hIn)+'" width="'+bw+'" height="'+Math.max(hIn,0)+'" rx="3" fill="#178A50"/>';
+    svg+='<rect x="'+(cxm+gap/2)+'" y="'+(H-padB-hOut)+'" width="'+bw+'" height="'+Math.max(hOut,0)+'" rx="3" fill="#C94747"/>';
+    svg+='<text x="'+cxm+'" y="'+(H-padB+20)+'" text-anchor="middle" font-size="12" fill="#71808C" font-family="inherit">'+J_MONTHS[i].slice(0,3)+'</text>';
+  });
+  svg+='</svg>';
+  $("barChart").innerHTML=svg+'<div class="legend"><span class="lg-item"><span class="lg-dot" style="background:#178A50"></span>دریافتی</span><span class="lg-item"><span class="lg-dot" style="background:#C94747"></span>خروجی (هزینه + پرداختی)</span></div>';
+}
+function renderLine(){
+  var jy=+$("chYear").value||todayJalali().jy,rows=monthlyRows(jy);
+  var cum=0,pts=rows.map(function(r){cum+=r.saving;return cum;});
+  var mn=Math.min(0,Math.min.apply(null,pts)),mxv=Math.max(1,Math.max.apply(null,pts));
+  mxv=niceMax(mxv);if(mn<0)mn=-niceMax(-mn);
+  var W=960,H=320,padL=14,padR=86,padT=16,padB=44,ih=H-padT-padB,iw=W-padL-padR;
+  function Y(v){return padT+ih*(1-(v-mn)/(mxv-mn));}
+  function X(i){return padL+iw-(i+0.5)*(iw/12);} /* راست‌به‌چپ */
+  var svg=svgOpen(W,H);
+  for(var g=0;g<=4;g++){
+    var yv=mn+(mxv-mn)*g/4,y=Y(yv);
+    svg+='<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="#E4E0D5"/>';
+    svg+='<text x="'+(W-padR+8)+'" y="'+(y+4)+'" font-size="12" fill="#71808C" font-family="inherit">'+fmtShort(yv)+'</text>';
+  }
+  if(mn<0)svg+='<line x1="'+padL+'" y1="'+Y(0)+'" x2="'+(W-padR)+'" y2="'+Y(0)+'" stroke="#B0AA99" stroke-dasharray="4 4"/>';
+  var path="",area="M"+X(0)+" "+Y(0);
+  pts.forEach(function(v,i){path+=(i?" L":"M")+X(i).toFixed(1)+" "+Y(v).toFixed(1);area+=" L"+X(i).toFixed(1)+" "+Y(v).toFixed(1);});
+  area+=" L"+X(11)+" "+Y(0)+" Z";
+  svg+='<path d="'+area+'" fill="#0E5F52" opacity="0.08"/>';
+  svg+='<path d="'+path+'" fill="none" stroke="#0E5F52" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+  pts.forEach(function(v,i){
+    svg+='<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="4.5" fill="#fff" stroke="#0E5F52" stroke-width="2.5"><title>'+J_MONTHS[i]+": "+fmt(v)+'</title></circle>';
+    svg+='<text x="'+X(i)+'" y="'+(H-padB+20)+'" text-anchor="middle" font-size="12" fill="#71808C" font-family="inherit">'+J_MONTHS[i].slice(0,3)+'</text>';
+  });
+  svg+='</svg>';
+  $("lineChart").innerHTML=svg;
+}
+function renderCharts(){renderPie();renderBar();renderLine();}
+$("chYear").addEventListener("change",renderCharts);
+$("chPieMonth").addEventListener("change",renderPie);
+
+/* ================= پشتیبان‌گیری و بازیابی ================= */
+function exportJson(){
+  var tj=todayJalali();
+  DB.meta.lastExportTs=Date.now();
+  saveDB(false);
+  var name="hesabdar-backup-"+tj.jy+"-"+pad2(tj.jm)+"-"+pad2(tj.jd)+".json";
+  download(name,JSON.stringify(DB,null,1),"application/json");
+  renderSettings();renderDashboard();
+  alert("فایل پشتیبان با نام «"+name+"» ذخیره شد.\nآن را در گوگل درایو (کنار فایل برنامه) آپلود کنید.");
+}
+$("btnExportJson").addEventListener("click",exportJson);
+$("bannerExportBtn").addEventListener("click",exportJson);
+var importMode="merge";
+$("btnImportMerge").addEventListener("click",function(){importMode="merge";$("importFile").value="";$("importFile").click();});
+$("btnImportReplace").addEventListener("click",function(){
+  if(!confirm("جایگزینی کامل، همه داده‌های فعلی این دستگاه را حذف و محتوای فایل پشتیبان را جایگزین می‌کند. ادامه می‌دهید؟"))return;
+  importMode="replace";$("importFile").value="";$("importFile").click();
+});
+$("importFile").addEventListener("change",function(){
+  var f=this.files[0];if(!f)return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    var inc;
+    try{inc=JSON.parse(reader.result);}catch(e){alert("فایل انتخاب‌شده یک پشتیبان معتبر نیست.");return;}
+    if(!inc||!Array.isArray(inc.transactions)){alert("ساختار فایل پشتیبان معتبر نیست.");return;}
+    if(importMode==="replace"){
+      DB=inc;normalizeDB();
+      DB.meta.lastChangeTs=0;DB.meta.lastExportTs=Date.now();
+      saveDB(false);
+      alert("بازیابی کامل انجام شد: "+faNum(DB.transactions.length)+" تراکنش بارگذاری شد.");
+    }else{
+      var added=0,updated=0,map={};
+      DB.transactions.forEach(function(t,i){map[t.id]=i;});
+      inc.transactions.forEach(function(t){
+        if(!t||!t.id)return;
+        if(map[t.id]==null){DB.transactions.push(t);added++;}
+        else if((t.ts||0)>(DB.transactions[map[t.id]].ts||0)){DB.transactions[map[t.id]]=t;updated++;}
+      });
+      if(inc.accounts)inc.accounts.forEach(function(a){
+        if(!DB.accounts.some(function(x){return x.id===a.id||x.name===a.name;}))DB.accounts.push(a);
+      });
+      if(inc.categories)["income","expense","payment"].forEach(function(ty){
+        (inc.categories[ty]||[]).forEach(function(c){if(DB.categories[ty].indexOf(c)===-1)DB.categories[ty].push(c);});
+      });
+      saveDB();
+      alert("ادغام هوشمند انجام شد.\nتراکنش‌های جدید: "+faNum(added)+"\nتراکنش‌های به‌روزشده: "+faNum(updated)+"\n\nیادآوری: اگر روی این دستگاه تراکنش تازه‌ای دارید، در پایان کار پشتیبان جدید بگیرید.");
+    }
+    initSelectors();renderAllTabs();
+  };
+  reader.readAsText(f,"utf-8");
+});
+$("btnWipe").addEventListener("click",function(){
+  if(!confirm("همه تراکنش‌ها، حساب‌ها و دسته‌ها از این دستگاه حذف می‌شوند. مطمئن هستید؟"))return;
+  if(!confirm("تأیید نهایی: این عمل بازگشت‌پذیر نیست (مگر با فایل پشتیبان). حذف شود؟"))return;
+  DB=defaultDB();saveDB(false);
+  initSelectors();renderAllTabs();
+  alert("همه داده‌ها پاک شد.");
+});
+
+/* ================= حساب‌ها، دسته‌ها و تنظیمات ================= */
+function accountHasTx(id){return DB.transactions.some(function(t){return t.account===id;});}
+function catHasTx(type,name){return DB.transactions.some(function(t){return t.type===type&&t.category===name;});}
+function renderSettings(){
+  var h="";
+  DB.accounts.forEach(function(a){
+    h+='<li><span>'+esc(a.name)+' <small style="color:var(--muted)">— موجودی: '+fmt(accountBalance(a.id))+'</small></span>'+
+       '<button class="btn btn-ghost btn-sm" onclick="removeAccount(\''+a.id+'\')">حذف</button></li>';
+  });
+  $("accountList").innerHTML=h||'<li class="empty-note">حسابی تعریف نشده است.</li>';
+  var ty=$("catTypeSel").value;h="";
+  DB.categories[ty].forEach(function(c,i){
+    h+='<li><span>'+esc(c)+'</span><button class="btn btn-ghost btn-sm" onclick="removeCategory(\''+ty+'\','+i+')">حذف</button></li>';
+  });
+  $("categoryList").innerHTML=h;
+  $("setCurrency").value=DB.settings.currency;
+  var st="تعداد کل تراکنش‌ها: "+faNum(DB.transactions.length);
+  if(DB.meta.lastExportTs){
+    var d=new Date(DB.meta.lastExportTs),j=toJalaali(d.getFullYear(),d.getMonth()+1,d.getDate());
+    st+=" — آخرین پشتیبان: "+jDateStr(j)+" ساعت "+faNum(pad2(d.getHours()))+":"+faNum(pad2(d.getMinutes()));
+  }else st+=" — هنوز پشتیبانی تهیه نشده است.";
+  $("backupStatus").textContent=st;
+}
+window.removeAccount=function(id){
+  if(accountHasTx(id)){alert("این حساب تراکنش ثبت‌شده دارد و برای حفظ سابقه قابل حذف نیست.");return;}
+  if(DB.accounts.length===1){alert("دست‌کم یک حساب باید وجود داشته باشد.");return;}
+  if(!confirm("حذف این حساب؟"))return;
+  DB.accounts=DB.accounts.filter(function(a){return a.id!==id;});
+  saveDB();initSelectors();renderSettings();renderDashboard();
+};
+window.removeCategory=function(ty,i){
+  var name=DB.categories[ty][i];
+  if(catHasTx(ty,name)){alert("این دسته تراکنش ثبت‌شده دارد و قابل حذف نیست.");return;}
+  if(DB.categories[ty].length===1){alert("دست‌کم یک دسته باید وجود داشته باشد.");return;}
+  if(!confirm("حذف دسته «"+name+"»؟"))return;
+  DB.categories[ty].splice(i,1);
+  saveDB();initSelectors();renderSettings();
+};
+$("btnAddAccount").addEventListener("click",function(){
+  var name=$("newAccName").value.trim();
+  if(!name){alert("نام حساب را وارد کنید.");return;}
+  if(DB.accounts.some(function(a){return a.name===name;})){alert("حسابی با این نام وجود دارد.");return;}
+  DB.accounts.push({id:uid(),name:name,initial:parseAmount($("newAccInit").value)});
+  $("newAccName").value="";$("newAccInit").value="";
+  saveDB();initSelectors();renderSettings();renderDashboard();
+});
+$("newAccInit").addEventListener("input",function(){var v=parseAmount(this.value);this.value=v?fmt(v):"";});
+$("btnAddCategory").addEventListener("click",function(){
+  var name=$("newCatName").value.trim(),ty=$("catTypeSel").value;
+  if(!name){alert("نام دسته را وارد کنید.");return;}
+  if(DB.categories[ty].indexOf(name)>-1){alert("این دسته از قبل وجود دارد.");return;}
+  DB.categories[ty].push(name);
+  $("newCatName").value="";
+  saveDB();initSelectors();renderSettings();
+});
+$("catTypeSel").addEventListener("change",renderSettings);
+$("setCurrency").addEventListener("change",function(){
+  DB.settings.currency=this.value;saveDB();
+  document.querySelectorAll(".currency-label").forEach(function(el){el.textContent=DB.settings.currency;});
+  renderDashboard();
+});
+
+/* ================= راه‌اندازی ================= */
+function initSelectors(){
+  fillCategorySelect($("fCategory"),currentType());
+  fillAccountSelect($("fAccount"));
+  fillListFilters();
+  fillYearSelect("rpYear");fillYearSelect("rcYear");fillYearSelect("chYear");
+  var h='<option value="0">کل سال</option>';
+  for(var m=1;m<=12;m++)h+='<option value="'+m+'">'+J_MONTHS[m-1]+'</option>';
+  var cur=$("rcMonth").value;$("rcMonth").innerHTML=h;$("rcMonth").value=cur||"0";
+  cur=$("chPieMonth").value;$("chPieMonth").innerHTML=h;$("chPieMonth").value=cur||"0";
+  document.querySelectorAll(".currency-label").forEach(function(el){el.textContent=DB.settings.currency;});
+}
+function renderAllTabs(){
+  renderDashboard();renderTxList();renderMonthlyReport();renderCatReport();renderCharts();renderSettings();
+}
+tabRenderers={
+  dashboard:renderDashboard,
+  list:function(){fillListFilters();renderTxList();},
+  reports:function(){fillYearSelect("rpYear");fillYearSelect("rcYear");renderMonthlyReport();renderCatReport();},
+  charts:function(){fillYearSelect("chYear");renderCharts();},
+  settings:renderSettings
+};
+loadDB();
+fillDateTriplet("fDay","fMonth","fYear");
+var _tj=todayJalali(),_first={jy:_tj.jy,jm:_tj.jm,jd:1};
+fillDateTriplet("rgFromD","rgFromM","rgFromY",_first);
+fillDateTriplet("rgToD","rgToM","rgToY",_tj);
+initSelectors();
+renderAllTabs();
+</script>
+</body>
+</html>
