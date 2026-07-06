@@ -31,21 +31,21 @@ All financial data remains on the user's device.
 - Responsive interface
 
 
-#Technology
+## Technology
 HTML5
 CSS3
 Vanilla JavaScript
 
 No external libraries are required.
 
-##Data Storage
+## Data Storage
 
 Data is stored locally using the browser's Local Storage.
 
 No information is transmitted over the Internet.
 
 
-#Author
+## Author
 
 Daryoosh Borzuei
 
@@ -53,6 +53,6 @@ Google Scholar: https://scholar.google.com/citations?user=kKVpJGcAAAAJ&hl=fa
 
 ResearchGate: https://www.researchgate.net/profile/Daryoosh-Borzuei-2
 
-#License
+## License
 
 All rights reserved.
